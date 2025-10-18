@@ -1,0 +1,577 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <!-- Safe areas for iPhone -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Horror-flix • Dare to Stream</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --blood: #e50914;
+      --eerie: #0b0b0d;
+      --ink: #0f0f14;
+      --glow: rgba(229, 9, 20, .35);
+      --blur-bg: rgba(5,5,8,.75);
+    }
+
+    /* Base */
+    body { background: var(--eerie); color: #fff; }
+
+    /* Hero background & motion */
+    .hero-bg{will-change:transform;transform:scale(1);transition:transform .2s linear;background-position:center;background-size:cover}
+    @media (prefers-reduced-motion: reduce){ .hero-bg{transition:none!important;transform:none!important} }
+
+    /* Subtle grain */
+    .grain:before{
+      content:"";position:fixed;inset:0;pointer-events:none;
+      background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="140" height="140" viewBox="0 0 140 140"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="2" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23n)" opacity="0.06"/></svg>');
+      mix-blend-mode:overlay;z-index:1;
+    }
+
+    /* Glow hovers */
+    .glow:hover { box-shadow: 0 0 24px var(--glow); transform: translateY(-1px) scale(1.02); }
+    .soft-glow { box-shadow: 0 0 20px rgba(229,9,20,.25); }
+
+    /* Buttons */
+    .btn-red { background: var(--blood); }
+    .btn-red:hover { background:#ff2b35; }
+
+    /* Sticky CTA background */
+    .sticky-cta{background:var(--blur-bg);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+
+    /* Badges */
+    .badge{font-size:11px;padding:.15rem .5rem;border:1px solid rgba(255,255,255,.2);border-radius:999px;color:rgba(255,255,255,.85)}
+
+    /* Modal overlay */
+    .modal{background:rgba(0,0,0,.65)}
+
+    /* Choice state */
+    .choice{transition:border-color .15s ease, background-color .15s ease}
+    .choice[data-selected="true"]{border-color:white;background-color:rgba(255,255,255,.06)}
+
+    /* Cinematic interstitial */
+    @keyframes sweep { from { width: 0% } to { width: 100% } }
+    @keyframes zoomIn { from { transform: scale(.96); opacity: 0 } to { transform: scale(1); opacity: 1 } }
+    @keyframes softGlow { 0%,100% { box-shadow: 0 0 0 rgba(229,9,20,0) } 50% { box-shadow: 0 0 40px rgba(229,9,20,.35) } }
+    .transition-screen { background: rgba(5,5,8,.92); backdrop-filter: blur(6px); }
+    .result-reveal { animation: zoomIn .7s ease-out both; }
+    .result-name-glow { animation: softGlow 1.6s ease-in-out 1; }
+    .progress-bar { animation: sweep 1.4s ease-out forwards; }
+
+    /* Flicker text (for fun labels) */
+    @keyframes flicker {
+      0%, 19%, 21%, 23%, 80%, 100% { text-shadow: 0 0 8px rgba(229,9,20,.45); }
+      20%, 22% { text-shadow: none; }
+    }
+    .flicker { animation: flicker 2.4s infinite; }
+
+    /* Floating embers in hero */
+    .embers { position:absolute; inset:0; pointer-events:none; }
+    .embers span{
+      position:absolute; width:2px; height:2px; background:rgba(255,255,255,.45);
+      filter: drop-shadow(0 0 4px rgba(229,9,20,.65));
+      animation: drift 7s linear infinite;
+    }
+    @keyframes drift {
+      0% { transform: translateY(0) translateX(0) scale(1); opacity:.9; }
+      100% { transform: translateY(-120vh) translateX(20vw) scale(.8); opacity:0; }
+    }
+
+    /* Ambient toggle chip */
+    .chip { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15); }
+    .chip:hover { background: rgba(255,255,255,.14); }
+
+    /* Cards */
+    .card { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); }
+  </style>
+</head>
+<body class="grain text-white">
+
+  <!-- NAV -->
+  <header class="absolute top-0 left-0 right-0 z-20">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <img src="logo.png" alt="Horror-flix" class="h-9 w-auto" />
+        <span class="text-xs badge ml-2">US</span>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <!-- Ambient audio toggle (user-initiated) -->
+        <button id="ambient-toggle"
+                class="chip text-xs px-3 py-1 rounded-full"
+                aria-pressed="false">🔇 Ambience</button>
+
+        <a href="#"
+           class="btn-red hover:glow text-white font-semibold text-sm px-5 py-2 rounded-md shadow-md transition">
+          Sign In
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="relative min-h-[100dvh] flex items-center">
+    <div class="absolute inset-0 overflow-hidden">
+      <div id="bg" class="hero-bg absolute inset-0"
+           style="background-image:url('https://images.unsplash.com/photo-1478720568477-152d9b164e26?q=80&w=2000&auto=format&fit=crop');"></div>
+      <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(229,9,20,.18),transparent_45%)]"></div>
+      <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-black/55 to-black/85"></div>
+
+      <!-- floating embers -->
+      <div class="embers">
+        <span style="left:10%; bottom:-10%; animation-delay:0s;"></span>
+        <span style="left:30%; bottom:-20%; animation-delay:.6s;"></span>
+        <span style="left:55%; bottom:-15%; animation-delay:1.2s;"></span>
+        <span style="left:75%; bottom:-25%; animation-delay:1.8s;"></span>
+        <span style="left:90%; bottom:-10%; animation-delay:.3s;"></span>
+      </div>
+    </div>
+
+    <div class="relative z-10 w-full">
+      <div class="max-w-3xl mx-auto px-6 text-center">
+        <h1 class="text-4xl md:text-6xl font-extrabold leading-tight">Dare to stream… alone?</h1>
+        <p class="text-white/85 text-lg md:text-xl mt-3">Unlimited horror, thrillers & twisted mysteries.</p>
+        <ul class="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-2 text-white/75 text-sm">
+          <li>🩸 Award-Winning Nightmares</li>
+          <li>🕯️ Watch Anywhere</li>
+          <li>🪦 Cancel Anytime</li>
+        </ul>
+
+        <!-- Quiz CTA -->
+        <div class="mt-8 flex items-center justify-center">
+          <button id="open-quiz"
+            class="inline-flex items-center justify-center px-8 py-4 rounded-full border border-white/30 text-white/90 bg-white/5 backdrop-blur-sm hover:bg-white/10 hover:border-white/50 font-semibold text-base transition glow">
+            Find Your Horror Archetype
+          </button>
+        </div>
+        <div class="mt-4 text-xs text-white/60">30-day free trial • No ads on Premium</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING (compact 3 plans) -->
+  <section id="plans" class="max-w-6xl mx-auto px-4 mt-10">
+    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#2b0b0d]/30 via-[#121217]/30 to-[#0a0a0c]/30 p-5 md:p-6 border border-white/10">
+      <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+        <div class="max-w-xl">
+          <h3 class="text-2xl md:text-3xl font-extrabold leading-tight">Choose your fate</h3>
+          <p class="text-white/80 text-base mt-1">Simple, flexible, cancel anytime.</p>
+        </div>
+      </div>
+
+      <div class="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <!-- Standard with ads -->
+        <div class="card rounded-xl p-4 shadow-sm">
+          <div class="flex items-center gap-2">
+            <span>👁️</span>
+            <h4 class="text-lg font-bold">Standard with ads</h4>
+          </div>
+          <div class="mt-2 text-2xl font-bold">US$7.99 <span class="text-sm text-white/70">/mo</span></div>
+          <ul class="mt-2 space-y-1 text-sm text-white/85">
+            <li>• Ad-supported catalog</li>
+            <li>• 1080p (Full HD)</li>
+            <li>• 2 devices</li>
+          </ul>
+          <a href="#" class="mt-3 inline-flex items-center justify-center px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 text-white/90 font-semibold transition">Learn More</a>
+        </div>
+
+        <!-- Standard (Most popular) -->
+        <div class="rounded-xl p-4 bg-white/[.08] border border-white/10 soft-glow relative">
+          <span class="absolute -top-2 left-4 text-[10px] px-2 py-0.5 rounded-full bg-[var(--blood)] text-white font-semibold flicker">Most popular</span>
+          <div class="flex items-center gap-2">
+            <span>🩸</span>
+            <h4 class="text-lg font-bold">Standard</h4>
+          </div>
+          <div class="mt-2 text-2xl font-bold">US$17.99 <span class="text-sm text-white/70">/mo</span></div>
+          <ul class="mt-2 space-y-1 text-sm text-white/85">
+            <li>• No ads</li>
+            <li>• 1080p (Full HD)</li>
+            <li>• 2 devices + downloads</li>
+          </ul>
+          <a href="#cta" class="mt-3 inline-flex items-center justify-center px-3 py-2 rounded-lg btn-red text-white font-semibold transition glow">Start Free</a>
+        </div>
+
+        <!-- Premium -->
+        <div class="card rounded-xl p-4 shadow-sm">
+          <div class="flex items-center gap-2">
+            <span>🕷️</span>
+            <h4 class="text-lg font-bold">Premium</h4>
+          </div>
+          <div class="mt-2 text-2xl font-bold">US$24.99 <span class="text-sm text-white/70">/mo</span></div>
+          <ul class="mt-2 space-y-1 text-sm text-white/85">
+            <li>• 4K + HDR</li>
+            <li>• 4 devices</li>
+            <li>• Spatial audio</li>
+          </ul>
+          <a href="#" class="mt-3 inline-flex items-center justify-center px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 text-white/90 font-semibold transition">Learn More</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Trending -->
+  <section class="max-w-6xl mx-auto px-4 mt-10" aria-labelledby="trending-title">
+    <div class="flex items-center justify-between mb-2">
+      <h3 id="trending-title" class="text-2xl font-bold">Trending Now</h3>
+      <span class="badge">Updated nightly</span>
+    </div>
+    <p class="text-white/80 text-sm mb-5 italic">Miss these… and they might haunt you later.</p>
+    <div id="trending5" class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"></div>
+  </section>
+
+  <section class="py-12"></section>
+
+  <!-- Sticky CTA -->
+  <div id="cta" class="fixed inset-x-0 bottom-0 z-30 pb-[max(8px,env(safe-area-inset-bottom))]">
+    <div class="max-w-6xl mx-auto px-2 md:px-4">
+      <div class="sticky-cta rounded-lg md:rounded-2xl border border-white/10 p-2 md:p-3 flex flex-col md:flex-row md:items-center justify-between gap-2 md:gap-3">
+        <div class="text-xs md:text-sm text-white/85 leading-tight">Start your 30-day free trial. Cancel anytime.</div>
+        <a href="#" class="w-full md:w-auto text-center px-4 py-2 md:px-6 md:py-3 text-sm md:text-base rounded-lg md:rounded-xl btn-red font-semibold shadow-lg shadow-[var(--glow)] transition">Start Watching Free</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quiz Modal (top-anchored, scrollable, sticky header) -->
+  <div id="quiz-modal" class="modal fixed inset-0 z-50 hidden items-start justify-center p-2 sm:p-4">
+    <div class="relative w-full max-w-sm sm:max-w-xl max-h-[100dvh] sm:max-h-[90vh] overflow-y-auto rounded-2xl sm:rounded-3xl bg-[var(--ink)] border border-white/10 shadow-2xl">
+      <div class="sticky top-0 z-10 bg-[var(--ink)]/95 backdrop-blur border-b border-white/10">
+        <div class="px-4 py-3 sm:px-5 sm:py-4 flex items-center justify-between">
+          <h3 class="text-base sm:text-lg font-bold">Find Your Horror Archetype</h3>
+          <button id="close-quiz" class="h-10 w-10 -mr-1 rounded-full flex items-center justify-center text-white/80 hover:text-white focus:outline-none focus:ring-2 focus:ring-white/40" aria-label="Close quiz">×</button>
+        </div>
+      </div>
+      <div class="p-4 sm:p-5">
+        <div id="quiz-progress" class="text-xs text-white/60 mb-2 sm:mb-3">Question 1 of 5</div>
+        <div id="quiz-question" class="text-base sm:text-lg font-semibold">Loading…</div>
+        <div id="quiz-choices" class="mt-3 sm:mt-4 grid gap-2"></div>
+        <div class="mt-4 sm:mt-5 flex items-center justify-between gap-2">
+          <button id="quiz-prev" class="px-3 py-2 sm:px-4 sm:py-2 rounded-lg border border-white/20 text-white/85 hover:border-white hidden">Back</button>
+          <div class="flex-1"></div>
+          <button id="quiz-next" class="px-4 py-2 rounded-lg bg-white text-black font-semibold">Next</button>
+          <button id="quiz-submit" class="px-4 py-2 rounded-lg btn-red text-white font-semibold hidden">See Results</button>
+        </div>
+        <div class="h-[max(12px,env(safe-area-inset-bottom))]"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Result Modal -->
+  <div id="result-modal" class="modal fixed inset-0 z-50 hidden items-start justify-center p-2 sm:p-4">
+    <div class="relative w-full max-w-sm sm:max-w-xl max-h-[100dvh] sm:max-h-[90vh] overflow-y-auto rounded-2xl sm:rounded-3xl bg-[var(--ink)] border border-white/10 shadow-2xl">
+      <div class="sticky top-0 z-10 bg-[var(--ink)]/95 backdrop-blur border-b border-white/10">
+        <div class="px-4 py-3 sm:px-5 sm:py-4 flex items-center justify-between">
+          <h3 class="text-base sm:text-lg font-bold">Your Horror Archetype</h3>
+          <button id="close-result" class="h-10 w-10 -mr-1 rounded-full flex items-center justify-center text-white/80 hover:text-white focus:outline-none focus:ring-2 focus:ring-white/40" aria-label="Close results">×</button>
+        </div>
+      </div>
+      <div class="p-4 sm:p-5" id="result-body"></div>
+      <div class="h-[max(12px,env(safe-area-inset-bottom))]"></div>
+    </div>
+  </div>
+
+  <!-- Transition + audio -->
+  <div id="result-transition" class="transition-screen fixed inset-0 z-[45] hidden items-center justify-center p-6 text-center text-white">
+    <div class="max-w-md w-full">
+      <div class="text-xl md:text-2xl font-semibold">Summoning your fate…</div>
+      <div class="mt-4 h-1.5 w-full bg-white/20 rounded-full overflow-hidden">
+        <div id="transition-progress" class="h-full bg-[var(--blood)] w-0 progress-bar"></div>
+      </div>
+      <div class="mt-3 text-xs text-white/60">Consulting the Book of Screams</div>
+    </div>
+  </div>
+
+  <audio id="ambient" src="ambient.mp3" loop preload="none"></audio>
+  <audio id="reveal-sound" src="reveal.mp3" preload="auto"></audio>
+
+  <script>
+    /* Parallax hero */
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const bg = document.getElementById('bg');
+    if (bg && !mediaQuery.matches) {
+      const onScroll = () => {
+        const y = window.scrollY || 0;
+        const s = Math.min(1 + (y / 3000), 1.06);
+        bg.style.transform = 'scale(' + s + ')';
+      };
+      document.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+    }
+
+    /* Ambient toggle (user gesture) */
+    const ambientToggle = document.getElementById('ambient-toggle');
+    const ambientAudio = document.getElementById('ambient');
+    let ambientOn = false;
+    ambientToggle.addEventListener('click', () => {
+      ambientOn = !ambientOn;
+      ambientToggle.setAttribute('aria-pressed', String(ambientOn));
+      ambientToggle.textContent = ambientOn ? '🔊 Ambience' : '🔇 Ambience';
+      if (ambientOn) { ambientAudio?.play?.().catch(()=>{}); }
+      else { ambientAudio?.pause?.(); }
+    });
+
+    /* Trending (use your own images later) */
+    const trending = [
+      { title: "The Haunting of Hill House", note: "#1 tonight", views: "2.3M", blurb: "Don’t watch alone.", img: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=1400&auto=format&fit=crop" },
+      { title: "Bird Box", note: "#2 tonight", views: "1.9M", blurb: "Trust your senses.", img: "https://images.unsplash.com/photo-1505330622279-bf7d7fc918f4?q=80&w=1400&auto=format&fit=crop" },
+      { title: "Midnight Mass", note: "#3 tonight", views: "1.6M", blurb: "Faith. Fear. Feast.", img: "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1400&auto=format&fit=crop" },
+      { title: "Fear Street", note: "#4 tonight", views: "1.3M", blurb: "It returns every summer.", img: "https://images.unsplash.com/photo-1503341455253-b2e723bb3dbb?q=80&w=1400&auto=format&fit=crop" },
+      { title: "28 Days Later", note: "#5 tonight", views: "1.1M", blurb: "Don’t blink.", img: "https://images.unsplash.com/photo-1519681390801-44b3b6b4c89a?q=80&w=1400&auto=format&fit=crop" }
+    ];
+    const tgrid = document.getElementById('trending5');
+    function tcard({ title, note, views, blurb, img }) {
+      const wrap = document.createElement('div');
+      wrap.innerHTML = `
+        <div class="rounded-3xl overflow-hidden border border-white/10 bg-white/5 shadow-sm flex flex-col transform transition will-change-transform hover:scale-[1.03] hover:shadow-[0_0_20px_rgba(229,9,20,0.35)]">
+          <div class="relative h-40 overflow-hidden">
+            <img src="${img}" alt="${title}" class="absolute inset-0 w-full h-full object-cover brightness-[.85] hover:brightness-100 transition" />
+          </div>
+          <div class="p-3 bg-black/60 mt-auto">
+            <div class="font-semibold">${title}</div>
+            <div class="text-xs text-white/70">${note}</div>
+            <div class="text-[11px] text-[var(--blood)] mt-1">🩸 Watched by ${views} tonight</div>
+            <div class="text-[11px] text-white/60 mt-1 italic">${blurb || ""}</div>
+          </div>
+        </div>`;
+      return wrap.firstElementChild;
+    }
+    trending.forEach(item => tgrid.appendChild(tcard(item)));
+
+    /* QUIZ: Horror theme */
+    const styles = {
+      SCREAMER: {
+        name: "The Screamer",
+        blurb: "You live for jump scares, chase scenes, and white-knuckle chaos.",
+        recs: [
+          { title: "The Conjuring", img: "https://image.tmdb.org/t/p/w500/wVYREutTvI2tmxr6ujrHT704wGF.jpg" },
+          { title: "Hush", img: "https://image.tmdb.org/t/p/w500/1eXVlKQEiC5Evhp1VGN9VOGBev5.jpg" },
+          { title: "It Follows", img: "https://image.tmdb.org/t/p/w500/4MrwJZr0R9LbyOgZqwLNmtzzxbu.jpg" }
+        ]
+      },
+      SUPERNATURAL: {
+        name: "The Believer",
+        blurb: "Ancient curses, haunted halls, and whispers from the dark? Yes, please.",
+        recs: [
+          { title: "The Haunting of Bly Manor", img: "https://image.tmdb.org/t/p/w500/4S8bTGxV5M9Y98Sxr2idKfnUSsC.jpg" },
+          { title: "The Ritual", img: "https://image.tmdb.org/t/p/w500/hY9Jr2d5i7xL7sRKqGZo4PMBVXr.jpg" },
+          { title: "Hereditary", img: "https://image.tmdb.org/t/p/w500/lHV8HHlhwNup2VbpiACtlKzaGIQ.jpg" }
+        ]
+      },
+      SLEUTH: {
+        name: "The Investigator",
+        blurb: "You crave mind games, folklore puzzles, and slow-burn dread.",
+        recs: [
+          { title: "Black Mirror", img: "https://image.tmdb.org/t/p/w500/5UaYsGZOFhjFDwQh6GuLjjA1WlF.jpg" },
+          { title: "Dark", img: "https://image.tmdb.org/t/p/w500/7GgqJfU6Y4ZCkxzgv2Fne5DE5F7.jpg" },
+          { title: "The Outsider", img: "https://image.tmdb.org/t/p/w500/1QqKM2V9u3aMcMBXNIN1qQbZy1t.jpg" }
+        ]
+      },
+      COMFORT_GOTH: {
+        name: "The Comfort Goth",
+        blurb: "Cozy chills, spooky laughs, and rewatchable cult vibes = perfect night.",
+        recs: [
+          { title: "Wednesday", img: "https://image.tmdb.org/t/p/w500/9PFonBhy4cQy7Jz20NpMygczOkv.jpg" },
+          { title: "What We Do in the Shadows", img: "https://image.tmdb.org/t/p/w500/nvFcvzY7qYAlWT0r1KeR0YV7Yuo.jpg" },
+          { title: "Goosebumps", img: "https://image.tmdb.org/t/p/w500/9y5KGVkS7jHimoMuquMNFc13JUO.jpg" }
+        ]
+      }
+    };
+
+    const quiz = [
+      { q: "First victim energy check — what vibe are you summoning tonight?",
+        options: [
+          { label: "I want pure adrenaline and loud screams", style: "SCREAMER" },
+          { label: "Something haunted with slow, creeping dread", style: "SUPERNATURAL" },
+          { label: "A clever mystery that gets under my skin", style: "SLEUTH" },
+          { label: "Spooky-cute comfort with laughs", style: "COMFORT_GOTH" }
+        ]},
+      { q: "Pick your setting before midnight strikes:",
+        options: [
+          { label: "Abandoned hospital / flashlight low", style: "SCREAMER" },
+          { label: "Crumbling manor with too many mirrors", style: "SUPERNATURAL" },
+          { label: "Foggy small town with secrets", style: "SLEUTH" },
+          { label: "Gothic academy or quirky vampire flat", style: "COMFORT_GOTH" }
+        ]},
+      { q: "When you press play you’re usually…",
+        options: [
+          { label: "Screaming at the screen (fun!)", style: "SCREAMER" },
+          { label: "Scanning shadows for ghosts", style: "SUPERNATURAL" },
+          { label: "Pausing to decode clues", style: "SLEUTH" },
+          { label: "Snacking and giggling through the chills", style: "COMFORT_GOTH" }
+        ]},
+      { q: "Choose your weapon:",
+        options: [
+          { label: "Baseball bat & terrible decisions", style: "SCREAMER" },
+          { label: "Holy water & Latin chants", style: "SUPERNATURAL" },
+          { label: "Red string & cork board", style: "SLEUTH" },
+          { label: "Blanket fort & black nail polish", style: "COMFORT_GOTH" }
+        ]},
+      { q: "Movie or series for tonight?",
+        options: [
+          { label: "Movie — short, sharp, shocking", style: "SCREAMER" },
+          { label: "Either — as long as it’s cursed", style: "SUPERNATURAL" },
+          { label: "Either — if it’s brilliantly twisty", style: "SLEUTH" },
+          { label: "Either — as long as it’s rewatchable", style: "COMFORT_GOTH" }
+        ]}
+    ];
+
+    /* Quiz state */
+    let idx = 0;
+    const picks = [];
+    const quizModal = document.getElementById('quiz-modal');
+    const openBtn = document.getElementById('open-quiz');
+    const closeBtn = document.getElementById('close-quiz');
+    const qEl = document.getElementById('quiz-question');
+    const cEl = document.getElementById('quiz-choices');
+    const progressEl = document.getElementById('quiz-progress');
+    const prevBtn = document.getElementById('quiz-prev');
+    const nextBtn = document.getElementById('quiz-next');
+    const submitBtn = document.getElementById('quiz-submit');
+
+    function render() {
+      const item = quiz[idx];
+      progressEl.textContent = 'Question ' + (idx + 1) + ' of ' + quiz.length;
+      qEl.textContent = item.q;
+      cEl.innerHTML = '';
+      item.options.forEach((opt, i) => {
+        const b = document.createElement('button');
+        b.className = 'choice w-full text-left px-3 py-3 sm:px-4 sm:py-3 rounded-xl border border-white/15 hover:border-white/35';
+        b.dataset.index = i;
+        b.dataset.selected = (picks[idx] && picks[idx] === opt.style) ? 'true' : 'false';
+        b.innerHTML = opt.label;
+        b.addEventListener('click', () => {
+          picks[idx] = opt.style;
+          [...cEl.children].forEach(ch => ch.dataset.selected = 'false');
+          b.dataset.selected = 'true';
+          setTimeout(() => {
+            if (idx < quiz.length - 1) { idx++; render(); }
+            else { nextBtn.classList.add('hidden'); submitBtn.classList.remove('hidden'); }
+          }, 150);
+        });
+        cEl.appendChild(b);
+      });
+      prevBtn?.classList.toggle('hidden', idx === 0);
+      nextBtn?.classList.toggle('hidden', idx === quiz.length - 1);
+      submitBtn?.classList.toggle('hidden', idx !== quiz.length - 1);
+    }
+
+    /* Scroll lock */
+    function lockScroll() {
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden';
+      document.body.style.touchAction = 'none';
+    }
+    function unlockScroll() {
+      document.documentElement.style.overflow = '';
+      document.body.style.overflow = '';
+      document.body.style.touchAction = '';
+    }
+
+    /* Open/close quiz */
+    openBtn.addEventListener('click', () => {
+      quizModal.classList.remove('hidden'); quizModal.classList.add('flex');
+      lockScroll();
+      idx = 0; picks.length = 0;
+      render();
+    });
+    closeBtn.addEventListener('click', () => {
+      quizModal.classList.add('hidden'); quizModal.classList.remove('flex');
+      unlockScroll();
+    });
+    quizModal.addEventListener('click', (e) => {
+      if (e.target === quizModal) {
+        quizModal.classList.add('hidden'); quizModal.classList.remove('flex');
+        unlockScroll();
+      }
+    });
+
+    prevBtn?.addEventListener('click', () => { if (idx > 0) { idx--; render(); } });
+    nextBtn?.addEventListener('click', () => { if (idx < quiz.length - 1) { idx++; render(); } });
+
+    /* Results */
+    const resultModal = document.getElementById('result-modal');
+    const resultBody = document.getElementById('result-body');
+    const closeResult = document.getElementById('close-result');
+
+    let playedReveal = false;
+    function playRevealOnce() {
+      const revealSound = document.getElementById('reveal-sound');
+      if (!playedReveal && revealSound && revealSound.play) {
+        playedReveal = true;
+        revealSound.currentTime = 0;
+        revealSound.play().catch(() => {});
+      }
+    }
+
+    submitBtn.addEventListener('click', () => {
+      const counts = { SCREAMER:0, SUPERNATURAL:0, SLEUTH:0, COMFORT_GOTH:0 };
+      picks.forEach(k => counts[k]++);
+      const winner = Object.keys(counts).sort((a,b) => counts[b]-counts[a])[0];
+      const style = styles[winner];
+
+      resultBody.innerHTML = ''
+        + '<div class="result-reveal text-center">'
+        +   '<div class="text-xl font-semibold mb-1">You are…</div>'
+        +   '<div class="text-3xl md:text-4xl font-extrabold result-name-glow text-[var(--blood)]">' + style.name + '</div>'
+        +   '<div class="text-white/80 mt-2">' + style.blurb + '</div>'
+        + '</div>'
+        + '<div class="mt-6">'
+        +   '<div class="text-sm text-white/85 mb-2">Offerings to the altar (recommended):</div>'
+        +   '<div class="grid sm:grid-cols-3 gap-3" id="rec-grid"></div>'
+        +   '<div class="text-xs text-white/50 mt-3">Availability may vary by region.</div>'
+        +   '<div class="mt-6 text-center">'
+        +     '<a href="#cta" class="inline-flex items-center justify-center px-6 py-3 rounded-xl btn-red hover:glow font-semibold shadow-lg transition">Start Watching</a>'
+        +   '</div>'
+        + '</div>';
+
+      const recGrid = resultBody.querySelector('#rec-grid');
+      style.recs.forEach(({ title, img }) => {
+        const el = document.createElement('div');
+        el.className = 'group rounded-2xl overflow-hidden border border-white/10 bg-white/[.05] hover:scale-[1.03] transition cursor-pointer';
+        el.innerHTML = `
+          <div class="relative h-32 overflow-hidden">
+            <img src="${img}" alt="${title}" class="absolute inset-0 w-full h-full object-cover brightness-90 group-hover:brightness-110 transition" />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition"></div>
+          </div>
+          <div class="p-2 text-sm font-semibold text-center">${title}</div>
+        `;
+        recGrid.appendChild(el);
+      });
+
+      // interstitial
+      const transitionScreen = document.getElementById('result-transition');
+      const progress = document.getElementById('transition-progress');
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      quizModal.classList.add('hidden'); quizModal.classList.remove('flex');
+      progress.style.width = '0%';
+      transitionScreen.classList.remove('hidden'); transitionScreen.classList.add('flex');
+
+      playedReveal = false;
+      const DUR = reduceMotion ? 280 : 1500;
+      setTimeout(() => {
+        transitionScreen.classList.add('hidden'); transitionScreen.classList.remove('flex');
+        resultModal.classList.remove('hidden'); resultModal.classList.add('flex');
+        playRevealOnce();
+      }, DUR);
+    });
+
+    closeResult.addEventListener('click', () => {
+      resultModal.classList.add('hidden'); resultModal.classList.remove('flex');
+      unlockScroll();
+      const revealSound = document.getElementById('reveal-sound');
+      if (revealSound) { revealSound.pause(); revealSound.currentTime = 0; }
+    });
+
+    // ESC closes
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.getElementById('quiz-modal').classList.add('hidden');
+        document.getElementById('result-modal').classList.add('hidden');
+        document.getElementById('result-transition').classList.add('hidden');
+        unlockScroll();
+      }
+    });
+  </script>
+</body>
+</html>
