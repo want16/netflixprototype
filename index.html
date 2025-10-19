@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -7,7 +6,7 @@
   <title>Horror-flix • Dare to Stream</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    :root { --blood:#e50914; --fog:#e8e8f0; --eerie:#0b0b0d; --ink:#0f0f14; --glow:rgba(229,9,20,.35); --blur-bg:rgba(5,5,8,.75); }
+    :root { --blood:#e50914; --eerie:#0b0b0d; --ink:#0f0f14; --glow:rgba(229,9,20,.35); --blur-bg:rgba(5,5,8,.75); }
     body{background:var(--eerie);color:#fff}
     .hero-bg{will-change:transform;transform:scale(1);transition:transform .2s linear;background-position:center;background-size:cover}
     @media (prefers-reduced-motion: reduce){ .hero-bg{transition:none!important;transform:none!important} }
@@ -35,20 +34,13 @@
     .chip{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15)} .chip:hover{background:rgba(255,255,255,.14)}
     .card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
 
-    /* Wheel + rotor + labels (ALIGNED) */
+    /* Wheel + labels */
     .wheel-wrap{position:relative;width:280px;height:280px}
-    .wheel-rotor{position:relative;width:100%;height:100%;border-radius:9999px}
-    .wheel{position:absolute;inset:0;border-radius:9999px;border:6px solid rgba(255,255,255,.1);box-shadow:inset 0 0 40px rgba(0,0,0,.5),0 0 30px rgba(229,9,20,.15)}
+    .wheel{width:100%;height:100%;border-radius:9999px;border:6px solid rgba(255,255,255,.1);box-shadow:inset 0 0 40px rgba(0,0,0,.5),0 0 30px rgba(229,9,20,.15)}
     .wheel-pointer{width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;border-bottom:18px solid var(--blood)}
     .wheel-spin{transition:transform 3.2s cubic-bezier(.1,.75,.15,1)}
-    .wheel-label{position:absolute;left:50%;top:50%;transform-origin:center center;width:100px;margin-left:-50px;text-align:center;line-height:1.1}
-    .wheel-label b{display:block;font-size:11px}
-    .wheel-label small{display:block;opacity:.8;font-size:10px}
-    .wheel-label .emoji{display:block;font-size:14px;opacity:.95;margin-bottom:2px}
-
-    /* Colors for labels */
-    .label-red{color:var(--blood);text-shadow:0 1px 2px rgba(0,0,0,.6),0 0 8px rgba(229,9,20,.35)}
-    .label-fog{color:var(--fog);text-shadow:0 1px 2px rgba(0,0,0,.6)}
+    .wheel-label{position:absolute;left:50%;top:50%;transform-origin:center center;font-size:11px;line-height:1.15;text-align:center;width:110px;margin-left:-55px;text-shadow:0 1px 2px rgba(0,0,0,.6);pointer-events:none;font-weight:700;letter-spacing:.2px}
+    .wheel-label small{display:block;opacity:.9;font-weight:600;font-size:10px;letter-spacing:.1px}
   </style>
 </head>
 <body class="grain text-white">
@@ -56,11 +48,11 @@
   <header class="absolute top-0 left-0 right-0 z-20">
     <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
       <div class="flex items-center gap-2">
-        <img src="logo.png" alt="Horror-flix" class="h-30 w-auto" />
+        <img src="logo.png" alt="Horror-flix" class="h-9 w-auto" />
         <span class="text-xs badge ml-2">US</span>
       </div>
       <div class="flex items-center gap-2">
-        <button id="ambient-toggle" class="chip text-xs px-3 py-1 rounded-full" aria-pressed="true">🔊 Ambience</button>
+        <button id="ambient-toggle" class="chip text-xs px-3 py-1 rounded-full" aria-pressed="false">🔇 Ambience</button>
         <a href="#" class="btn-red hover:glow text-white font-semibold text-sm px-5 py-2 rounded-md shadow-md transition">Sign In</a>
       </div>
     </div>
@@ -191,7 +183,7 @@
     </div>
   </div>
 
-  <!-- Wheel of Fate (ALIGNED + COLORED LABELS + EMOJIS) -->
+  <!-- Wheel of Fate Modal (WITH COLORED LABELS + EMOJI) -->
   <div id="wheel-modal" class="modal fixed inset-0 z-50 hidden items-start justify-center p-2 sm:p-4">
     <div class="relative w-full max-w-sm sm:max-w-lg max-h-[100dvh] sm:max-h-[90vh] overflow-y-auto rounded-2xl sm:rounded-3xl bg-[var(--ink)] border border-white/10 shadow-2xl">
       <div class="sticky top-0 z-10 bg-[var(--ink)]/95 backdrop-blur border-b border-white/10">
@@ -205,18 +197,17 @@
         <div class="flex flex-col items-center gap-4">
           <div class="wheel-area relative">
             <div class="wheel-pointer absolute left-1/2 -translate-x-1/2 -top-4"></div>
+
+            <!-- Wheel container with labels injected below -->
             <div class="wheel-wrap mx-auto">
-              <!-- ROTOR: we rotate this (wheel graphic + labels) together -->
-              <div id="wheel-rotor" class="wheel-rotor wheel-spin">
-                <div id="wheel" class="wheel"
-                     style="background: conic-gradient(
-                       rgba(229,9,20,.35) 0 45deg, rgba(255,255,255,.08) 45deg 90deg,
-                       rgba(229,9,20,.35) 90deg 135deg, rgba(255,255,255,.08) 135deg 180deg,
-                       rgba(229,9,20,.35) 180deg 225deg, rgba(255,255,255,.08) 225deg 270deg,
-                       rgba(229,9,20,.35) 270deg 315deg, rgba(255,255,255,.08) 315deg 360deg);">
-                </div>
-                <div id="wheel-labels"></div>
+              <div id="wheel" class="wheel wheel-spin"
+                   style="background: conic-gradient(
+                     rgba(229,9,20,.35) 0 45deg, rgba(255,255,255,.10) 45deg 90deg,
+                     rgba(229,9,20,.35) 90deg 135deg, rgba(255,255,255,.10) 135deg 180deg,
+                     rgba(229,9,20,.35) 180deg 225deg, rgba(255,255,255,.10) 225deg 270deg,
+                     rgba(229,9,20,.35) 270deg 315deg, rgba(255,255,255,.10) 315deg 360deg);">
               </div>
+              <div id="wheel-labels"></div>
             </div>
           </div>
           <button id="spin" class="inline-flex items-center justify-center px-5 py-2 rounded-lg btn-red text-white font-semibold glow">Spin</button>
@@ -252,7 +243,8 @@
     </div>
   </div>
 
-  <audio id="ambient" src="ambient.mp3" loop preload="auto"></audio>
+  <!-- Audio -->
+  <audio id="ambient" src="ambient.mp3" loop preload="auto" autoplay playsinline></audio>
   <audio id="reveal-sound" src="reveal.mp3" preload="auto"></audio>
   <audio id="drumroll" src="drumroll.mp3" preload="auto"></audio>
 
@@ -265,27 +257,24 @@
       document.addEventListener('scroll', onScroll, { passive: true }); onScroll();
     }
 
-    /* Ambient: try autoplay, allow toggle off, gentle fallbacks */
+    /* Ambient autoplay with graceful fallback */
     const ambientToggle = document.getElementById('ambient-toggle');
     const ambientAudio = document.getElementById('ambient');
-    let ambientWanted = true; // user intention
-    function setAmbientUI(on){ ambientToggle.setAttribute('aria-pressed', String(on)); ambientToggle.textContent = on ? '🔊 Ambience' : '🔇 Ambience'; }
-    async function tryPlayAmbient() {
-      if (!ambientWanted) return;
-      try { await ambientAudio.play(); setAmbientUI(true); }
-      catch (e) {
-        // Autoplay blocked — wait for first interaction
-        setAmbientUI(false);
-        const kick = () => { if (ambientWanted) ambientAudio.play().catch(()=>{}); setAmbientUI(true); window.removeEventListener('pointerdown', kick, { once:true }); };
-        window.addEventListener('pointerdown', kick, { once:true });
-      }
+    let ambientOn = false;
+    ambientAudio.volume = 0.25; // gentle ambience by default
+
+    function setAmbientUI(on) {
+      ambientOn = on;
+      ambientToggle.setAttribute('aria-pressed', String(on));
+      ambientToggle.textContent = on ? '🔊 Ambience' : '🔇 Ambience';
     }
-    document.addEventListener('DOMContentLoaded', tryPlayAmbient);
-    document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible' && ambientWanted && ambientAudio.paused){ ambientAudio.play().catch(()=>{});} });
-    ambientToggle.addEventListener('click', ()=>{
-      ambientWanted = !ambientWanted;
-      if (ambientWanted) { ambientAudio.play().catch(()=>{}); setAmbientUI(true); }
-      else { ambientAudio.pause(); setAmbientUI(false); }
+    // Try autoplay
+    document.addEventListener('DOMContentLoaded', () => {
+      ambientAudio.play().then(() => setAmbientUI(true)).catch(() => setAmbientUI(false));
+    });
+    ambientToggle.addEventListener('click', () => {
+      if (ambientOn) { ambientAudio.pause(); setAmbientUI(false); }
+      else { ambientAudio.play().then(()=>setAmbientUI(true)).catch(()=>setAmbientUI(false)); }
     });
 
     /* Trending (placeholder images) */
@@ -315,7 +304,7 @@
     }
     trending.forEach(item => tgrid.appendChild(tcard(item)));
 
-    /* QUIZ DATA (unchanged) */
+    /* QUIZ DATA */
     const styles = {
       SCREAMER:{ name:"The Screamer", blurb:"You live for jump scares, chase scenes, and white-knuckle chaos.", recs:[
         { title:"The Conjuring", img:"https://image.tmdb.org/t/p/w500/wVYREutTvI2tmxr6ujrHT704wGF.jpg" },
@@ -418,11 +407,11 @@
     });
     closeResult.addEventListener('click', ()=>{ resultModal.classList.add('hidden'); resultModal.classList.remove('flex'); unlockScroll(); const s=document.getElementById('reveal-sound'); if(s){s.pause(); s.currentTime=0;} });
 
-    /* WHEEL OF FATE — labels inside rotor for perfect alignment */
+    /* WHEEL OF FATE (+ COLORED LABELS & EMOJI) */
     const wheelModal = document.getElementById('wheel-modal');
     const openWheel = document.getElementById('open-wheel');
     const closeWheel = document.getElementById('close-wheel');
-    const wheelRotor = document.getElementById('wheel-rotor');
+    const wheel = document.getElementById('wheel');
     const wheelLabelsHost = document.getElementById('wheel-labels');
     const wheelResult = document.getElementById('wheel-result');
     const wheelPoster = document.getElementById('wheel-poster');
@@ -431,34 +420,38 @@
     const spinBtn = document.getElementById('spin');
     const drumroll = document.getElementById('drumroll');
 
-    // Titles + emoji + images (ensure correspondence)
+    /* Titles + emoji + posters (images match titles) */
     const wheelTitles = [
-      { title:"The Conjuring", emoji:"🪄", img:"https://image.tmdb.org/t/p/w500/wVYREutTvI2tmxr6ujrHT704wGF.jpg" },
-      { title:"Hush", emoji:"🔇", img:"https://image.tmdb.org/t/p/w500/1eXVlKQEiC5Evhp1VGN9VOGBev5.jpg" },
-      { title:"It Follows", emoji:"👣", img:"https://image.tmdb.org/t/p/w500/4MrwJZr0R9LbyOgZqwLNmtzzxbu.jpg" },
-      { title:"Hill House", emoji:"🏚️", img:"https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=1200&auto=format&fit=crop" },
-      { title:"Hereditary", emoji:"🕯️", img:"https://image.tmdb.org/t/p/w500/lHV8HHlhwNup2VbpiACtlKzaGIQ.jpg" },
+      { title:"The Conjuring", emoji:"🕯️", img:"https://image.tmdb.org/t/p/w500/wVYREutTvI2tmxr6ujrHT704wGF.jpg" },
+      { title:"Hush", emoji:"🤫", img:"https://image.tmdb.org/t/p/w500/1eXVlKQEiC5Evhp1VGN9VOGBev5.jpg" },
+      { title:"It Follows", emoji:"🚶", img:"https://image.tmdb.org/t/p/w500/4MrwJZr0R9LbyOgZqwLNmtzzxbu.jpg" },
+      { title:"The Haunting of Hill House", emoji:"🏚️", img:"https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=1200&auto=format&fit=crop" },
+      { title:"Hereditary", emoji:"🧿", img:"https://image.tmdb.org/t/p/w500/lHV8HHlhwNup2VbpiACtlKzaGIQ.jpg" },
       { title:"Dark", emoji:"🕳️", img:"https://image.tmdb.org/t/p/w500/7GgqJfU6Y4ZCkxzgv2Fne5DE5F7.jpg" },
-      { title:"Shadows", emoji:"🧛", img:"https://image.tmdb.org/t/p/w500/nvFcvzY7qYAlWT0r1KeR0YV7Yuo.jpg" },
-      { title:"Wednesday", emoji:"🖤", img:"https://image.tmdb.org/t/p/w500/9PFonBhy4cQy7Jz20NpMygczOkv.jpg" }
+      { title:"What We Do in the Shadows", emoji:"🧛", img:"https://image.tmdb.org/t/p/w500/nvFcvzY7qYAlWT0r1KeR0YV7Yuo.jpg" },
+      { title:"Wednesday", emoji:"🕷️", img:"https://image.tmdb.org/t/p/w500/9PFonBhy4cQy7Jz20NpMygczOkv.jpg" }
     ];
 
-    // Render labels (color + emoji) — inside rotor so they spin in sync
+    // Render radial labels around the wheel with slice colors
     function renderWheelLabels() {
+      if (!wheelLabelsHost) return;
       wheelLabelsHost.innerHTML = '';
       const slices = wheelTitles.length;
       const sliceDeg = 360 / slices; // 45°
-      const radius = 112;            // distance from center
-      const short = s => (s.length > 18 ? s.slice(0,16) + '…' : s);
+      const radius = 112;            // label distance
+      const colors = ['#ff3b45','#e5e5e5','#ff3b45','#e5e5e5','#ff3b45','#e5e5e5','#ff3b45','#e5e5e5']; // match conic alternation
+      const stroke = '0 1px 2px rgba(0,0,0,.75)';
 
       for (let i=0;i<slices;i++){
         const angle = (i * sliceDeg) + (sliceDeg / 2);
         const el = document.createElement('div');
-        el.className = 'wheel-label ' + (i % 2 === 0 ? 'label-red' : 'label-fog');
-        const item = wheelTitles[i];
-        el.innerHTML = `<span class="emoji">${item.emoji || ''}</span><b>${short(item.title)}</b><small>${i+1}</small>`;
-        // position along radius, keep upright (counter-rotate text for readability)
+        el.className = 'wheel-label';
+        const t = wheelTitles[i];
+        const shortTitle = t.title.length > 22 ? t.title.slice(0,20) + '…' : t.title;
+        el.innerHTML = `<span style="display:block; font-size:12px;">${t.emoji} ${shortTitle}</span><small>${i+1}</small>`;
         el.style.transform = `translate(-50%, -50%) rotate(${angle}deg) translate(0, -${radius}px) rotate(${-angle}deg)`;
+        el.style.color = colors[i];
+        el.style.textShadow = stroke;
         wheelLabelsHost.appendChild(el);
       }
     }
@@ -472,7 +465,6 @@
     wheelModal.addEventListener('click', (e)=>{ if(e.target===wheelModal) closeWheelModal(); });
 
     spinBtn.addEventListener('click', () => {
-      // stop reveal if playing and start drumroll
       const reveal = document.getElementById('reveal-sound'); if(reveal){ reveal.pause(); reveal.currentTime=0; }
       drumroll.currentTime = 0; drumroll.play().catch(()=>{});
       wheelResult.classList.add('hidden');
@@ -483,7 +475,7 @@
       const spins = 5;
       const targetRotation = (spins * 360) + (360 - targetCenterDeg);
       currentRotation = currentRotation + targetRotation;
-      wheelRotor.style.transform = `rotate(${currentRotation}deg)`;
+      wheel.style.transform = `rotate(${currentRotation}deg)`;
 
       const SPIN_DUR = 3200;
       setTimeout(() => {
@@ -493,7 +485,7 @@
 
         const pick = wheelTitles[landedIndex];
         wheelPoster.src = pick.img; wheelPoster.alt = pick.title;
-        wheelTitle.textContent = pick.title;
+        wheelTitle.textContent = `${pick.emoji} ${pick.title}`;
         wheelNote.textContent = "Tonight’s pick";
         wheelResult.classList.remove('hidden');
 
@@ -512,6 +504,3 @@
   </script>
 </body>
 </html>
-```
-
-If you want each slice’s **background color** to match a specific genre (not just alternating), I can generate a custom **conic-gradient** + label palette to match your exact lineup.
