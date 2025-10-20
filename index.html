@@ -6,41 +6,40 @@
   <title>Horror-flix • Dare to Stream</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    :root { --blood:#e50914; --eerie:#0b0b0d; --ink:#0f0f14; --glow:rgba(229,9,20,.35); --blur-bg:rgba(5,5,8,.75); }
-    body{background:var(--eerie);color:#fff}
+    :root {
+      --blood: #e50914; --eerie: #0b0b0d; --ink: #0f0f14; --glow: rgba(229, 9, 20, .35);
+      --blur-bg: rgba(5,5,8,.75);
+    }
+    body { background: var(--eerie); color: #fff; }
     .hero-bg{will-change:transform;transform:scale(1);transition:transform .2s linear;background-position:center;background-size:cover}
-    @media (prefers-reduced-motion: reduce){ .hero-bg{transition:none!important;transform:none!important} }
     .grain:before{content:"";position:fixed;inset:0;pointer-events:none;background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="140" height="140" viewBox="0 0 140 140"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="2" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23n)" opacity="0.06"/></svg>');mix-blend-mode:overlay;z-index:1}
-    .glow:hover{box-shadow:0 0 24px var(--glow);transform:translateY(-1px) scale(1.02)}
-    .soft-glow{box-shadow:0 0 20px rgba(229,9,20,.25)}
-    .btn-red{background:var(--blood)} .btn-red:hover{background:#ff2b35}
+    .glow:hover { box-shadow: 0 0 24px var(--glow); transform: translateY(-1px) scale(1.02); }
+    .soft-glow { box-shadow: 0 0 20px rgba(229,9,20,.25); }
+    .btn-red { background: var(--blood); } .btn-red:hover { background:#ff2b35; }
     .sticky-cta{background:var(--blur-bg);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
     .badge{font-size:11px;padding:.15rem .5rem;border:1px solid rgba(255,255,255,.2);border-radius:999px;color:rgba(255,255,255,.85)}
     .modal{background:rgba(0,0,0,.65)}
     .choice{transition:border-color .15s ease, background-color .15s ease}
     .choice[data-selected="true"]{border-color:white;background-color:rgba(255,255,255,.06)}
-    @keyframes sweep{from{width:0%}to{width:100%}}
-    @keyframes zoomIn{from{transform:scale(.96);opacity:0}to{transform:scale(1);opacity:1}}
-    @keyframes softGlow{0%,100%{box-shadow:0 0 0 rgba(229,9,20,0)} 50%{box-shadow:0 0 40px rgba(229,9,20,.35)}}
-    .transition-screen{background:rgba(5,5,8,.92);backdrop-filter:blur(6px)}
-    .result-reveal{animation:zoomIn .7s ease-out both}
-    .result-name-glow{animation:softGlow 1.6s ease-in-out 1}
-    .progress-bar{animation:sweep 1.4s ease-out forwards}
-    @keyframes flicker{0%,19%,21%,23%,80%,100%{text-shadow:0 0 8px rgba(229,9,20,.45)}20%,22%{text-shadow:none}}
-    .flicker{animation:flicker 2.4s infinite}
-    .embers{position:absolute;inset:0;pointer-events:none}
-    .embers span{position:absolute;width:2px;height:2px;background:rgba(255,255,255,.45);filter:drop-shadow(0 0 4px rgba(229,9,20,.65));animation:drift 7s linear infinite}
-    @keyframes drift{0%{transform:translateY(0) translateX(0) scale(1);opacity:.9}100%{transform:translateY(-120vh) translateX(20vw) scale(.8);opacity:0}}
-    .chip{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15)} .chip:hover{background:rgba(255,255,255,.14)}
-    .card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
+    @keyframes sweep { from { width: 0% } to { width: 100% } }
+    @keyframes zoomIn { from { transform: scale(.96); opacity: 0 } to { transform: scale(1); opacity: 1 } }
+    @keyframes softGlow { 0%,100% { box-shadow: 0 0 0 rgba(229,9,20,0) } 50% { box-shadow: 0 0 40px rgba(229,9,20,.35) } }
+    .transition-screen { background: rgba(5,5,8,.92); backdrop-filter: blur(6px); }
+    .result-reveal { animation: zoomIn .7s ease-out both; }
+    .result-name-glow { animation: softGlow 1.6s ease-in-out 1; }
+    .progress-bar { animation: sweep 1.4s ease-out forwards; }
+    @keyframes flicker { 0%,19%,21%,23%,80%,100%{text-shadow:0 0 8px rgba(229,9,20,.45)} 20%,22%{text-shadow:none} }
+    .flicker { animation:flicker 2.4s infinite; }
+    .embers { position:absolute; inset:0; pointer-events:none; }
+    .embers span{ position:absolute; width:2px; height:2px; background:rgba(255,255,255,.45); filter: drop-shadow(0 0 4px rgba(229,9,20,.65)); animation: drift 7s linear infinite; }
+    @keyframes drift { 0%{transform:translateY(0) translateX(0) scale(1);opacity:.9} 100%{transform:translateY(-120vh) translateX(20vw) scale(.8);opacity:0} }
+    .chip { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15); } .chip:hover{ background: rgba(255,255,255,.14); }
+    .card { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); }
 
-    /* Wheel + labels */
-    .wheel-wrap{position:relative;width:280px;height:280px}
-    .wheel{width:100%;height:100%;border-radius:9999px;border:6px solid rgba(255,255,255,.1);box-shadow:inset 0 0 40px rgba(0,0,0,.5),0 0 30px rgba(229,9,20,.15)}
-    .wheel-pointer{width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;border-bottom:18px solid var(--blood)}
-    .wheel-spin{transition:transform 3.2s cubic-bezier(.1,.75,.15,1)}
-    .wheel-label{position:absolute;left:50%;top:50%;transform-origin:center center;font-size:11px;line-height:1.15;text-align:center;width:110px;margin-left:-55px;text-shadow:0 1px 2px rgba(0,0,0,.6);pointer-events:none;font-weight:700;letter-spacing:.2px}
-    .wheel-label small{display:block;opacity:.9;font-weight:600;font-size:10px;letter-spacing:.1px}
+    /* Wheel of Fate */
+    .wheel { width: 280px; height: 280px; border-radius: 9999px; border: 6px solid rgba(255,255,255,.1); box-shadow: inset 0 0 40px rgba(0,0,0,.5), 0 0 30px rgba(229,9,20,.15); }
+    .wheel-pointer { width:0; height:0; border-left:12px solid transparent; border-right:12px solid transparent; border-bottom:18px solid var(--blood); }
+    .wheel-spin { transition: transform 3.2s cubic-bezier(.1,.75,.15,1); }
   </style>
 </head>
 <body class="grain text-white">
@@ -48,7 +47,7 @@
   <header class="absolute top-0 left-0 right-0 z-20">
     <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
       <div class="flex items-center gap-2">
-        <img src="logo.png" alt="Horror-flix" class="h-20 w-auto" />
+        <img src="logo.png" alt="Horror-flix" class="h-24 w-auto" />
       </div>
       <div class="flex items-center gap-2">
         <button id="ambient-toggle" class="chip text-xs px-3 py-1 rounded-full" aria-pressed="false">🔇 Ambience</button>
@@ -81,8 +80,13 @@
           <li>🪦 Cancel Anytime</li>
         </ul>
         <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
-          <button id="open-quiz" class="inline-flex items-center justify-center px-8 py-4 rounded-full border border-white/30 text-white/90 bg-white/5 backdrop-blur-sm hover:bg-white/10 hover:border-white/50 font-semibold text-base transition glow">Find Your Horror Archetype</button>
-          <button id="open-wheel" class="inline-flex items-center justify-center px-6 py-3 rounded-full border border-white/25 text-white/90 bg-white/5 hover:bg-white/10 font-medium text-sm transition">🎲 Spin the Wheel of Fate</button>
+          <button id="open-quiz" class="inline-flex items-center justify-center px-8 py-4 rounded-full border border-white/30 text-white/90 bg-white/5 backdrop-blur-sm hover:bg-white/10 hover:border-white/50 font-semibold text-base transition glow">
+            Find Your Horror Archetype
+          </button>
+          <!-- New: Wheel opener -->
+          <button id="open-wheel" class="inline-flex items-center justify-center px-6 py-3 rounded-full border border-white/30 text-white/90 bg-white/5 hover:bg-white/10 font-medium text-sm transition">
+            🎲 Spin the Wheel of Fate
+          </button>
         </div>
         <div class="mt-4 text-xs text-white/60">30-day free trial • No ads on Premium</div>
       </div>
@@ -182,7 +186,7 @@
     </div>
   </div>
 
-  <!-- Wheel of Fate Modal (WITH COLORED LABELS + EMOJI) -->
+  <!-- Wheel of Fate Modal -->
   <div id="wheel-modal" class="modal fixed inset-0 z-50 hidden items-start justify-center p-2 sm:p-4">
     <div class="relative w-full max-w-sm sm:max-w-lg max-h-[100dvh] sm:max-h-[90vh] overflow-y-auto rounded-2xl sm:rounded-3xl bg-[var(--ink)] border border-white/10 shadow-2xl">
       <div class="sticky top-0 z-10 bg-[var(--ink)]/95 backdrop-blur border-b border-white/10">
@@ -196,17 +200,13 @@
         <div class="flex flex-col items-center gap-4">
           <div class="wheel-area relative">
             <div class="wheel-pointer absolute left-1/2 -translate-x-1/2 -top-4"></div>
-
-            <!-- Wheel container with labels injected below -->
-            <div class="wheel-wrap mx-auto">
-              <div id="wheel" class="wheel wheel-spin"
-                   style="background: conic-gradient(
-                     rgba(229,9,20,.35) 0 45deg, rgba(255,255,255,.10) 45deg 90deg,
-                     rgba(229,9,20,.35) 90deg 135deg, rgba(255,255,255,.10) 135deg 180deg,
-                     rgba(229,9,20,.35) 180deg 225deg, rgba(255,255,255,.10) 225deg 270deg,
-                     rgba(229,9,20,.35) 270deg 315deg, rgba(255,255,255,.10) 315deg 360deg);">
-              </div>
-              <div id="wheel-labels"></div>
+            <div id="wheel" class="wheel wheel-spin mx-auto"
+                 style="background: conic-gradient(
+                   rgba(229,9,20,.35) 0 45deg, rgba(255,255,255,.08) 45deg 90deg,
+                   rgba(229,9,20,.35) 90deg 135deg, rgba(255,255,255,.08) 135deg 180deg,
+                   rgba(229,9,20,.35) 180deg 225deg, rgba(255,255,255,.08) 225deg 270deg,
+                   rgba(229,9,20,.35) 270deg 315deg, rgba(255,255,255,.08) 315deg 360deg);
+                 ">
             </div>
           </div>
           <button id="spin" class="inline-flex items-center justify-center px-5 py-2 rounded-lg btn-red text-white font-semibold glow">Spin</button>
@@ -242,8 +242,7 @@
     </div>
   </div>
 
-  <!-- Audio -->
-  <audio id="ambient" src="ambient.mp3" loop preload="auto" autoplay playsinline></audio>
+  <audio id="ambient" src="ambient.mp3" loop preload="none"></audio>
   <audio id="reveal-sound" src="reveal.mp3" preload="auto"></audio>
   <audio id="drumroll" src="drumroll.mp3" preload="auto"></audio>
 
@@ -252,28 +251,22 @@
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     const bg = document.getElementById('bg');
     if (bg && !mediaQuery.matches) {
-      const onScroll = () => { const y = window.scrollY || 0; const s = Math.min(1 + (y / 3000), 1.06); bg.style.transform = 'scale(' + s + ')'; };
+      const onScroll = () => {
+        const y = window.scrollY || 0;
+        const s = Math.min(1 + (y / 3000), 1.06);
+        bg.style.transform = 'scale(' + s + ')';
+      };
       document.addEventListener('scroll', onScroll, { passive: true }); onScroll();
     }
 
-    /* Ambient autoplay with graceful fallback */
+    /* Ambient toggle */
     const ambientToggle = document.getElementById('ambient-toggle');
-    const ambientAudio = document.getElementById('ambient');
-    let ambientOn = false;
-    ambientAudio.volume = 0.25; // gentle ambience by default
-
-    function setAmbientUI(on) {
-      ambientOn = on;
-      ambientToggle.setAttribute('aria-pressed', String(on));
-      ambientToggle.textContent = on ? '🔊 Ambience' : '🔇 Ambience';
-    }
-    // Try autoplay
-    document.addEventListener('DOMContentLoaded', () => {
-      ambientAudio.play().then(() => setAmbientUI(true)).catch(() => setAmbientUI(false));
-    });
+    const ambientAudio = document.getElementById('ambient'); let ambientOn = false;
     ambientToggle.addEventListener('click', () => {
-      if (ambientOn) { ambientAudio.pause(); setAmbientUI(false); }
-      else { ambientAudio.play().then(()=>setAmbientUI(true)).catch(()=>setAmbientUI(false)); }
+      ambientOn = !ambientOn;
+      ambientToggle.setAttribute('aria-pressed', String(ambientOn));
+      ambientToggle.textContent = ambientOn ? '🔊 Ambience' : '🔇 Ambience';
+      if (ambientOn) ambientAudio?.play?.().catch(()=>{}); else ambientAudio?.pause?.();
     });
 
     /* Trending (placeholder images) */
@@ -351,7 +344,7 @@
         { label:"Either — as long as it’s rewatchable", style:"COMFORT_GOTH" } ]}
     ];
 
-    /* Quiz state */
+    /* Quiz state + helpers */
     let idx = 0; const picks = [];
     const quizModal = document.getElementById('quiz-modal'), openBtn = document.getElementById('open-quiz'), closeBtn = document.getElementById('close-quiz');
     const qEl = document.getElementById('quiz-question'), cEl = document.getElementById('quiz-choices'), progressEl = document.getElementById('quiz-progress');
@@ -406,12 +399,11 @@
     });
     closeResult.addEventListener('click', ()=>{ resultModal.classList.add('hidden'); resultModal.classList.remove('flex'); unlockScroll(); const s=document.getElementById('reveal-sound'); if(s){s.pause(); s.currentTime=0;} });
 
-    /* WHEEL OF FATE (+ COLORED LABELS & EMOJI) */
+    /* WHEEL OF FATE */
     const wheelModal = document.getElementById('wheel-modal');
     const openWheel = document.getElementById('open-wheel');
     const closeWheel = document.getElementById('close-wheel');
     const wheel = document.getElementById('wheel');
-    const wheelLabelsHost = document.getElementById('wheel-labels');
     const wheelResult = document.getElementById('wheel-result');
     const wheelPoster = document.getElementById('wheel-poster');
     const wheelTitle = document.getElementById('wheel-title');
@@ -419,44 +411,19 @@
     const spinBtn = document.getElementById('spin');
     const drumroll = document.getElementById('drumroll');
 
-    /* Titles + emoji + posters (images match titles) */
+    // 8 options (match wheel slices; feel free to swap images)
     const wheelTitles = [
-      { title:"The Conjuring", emoji:"🕯️", img:"https://image.tmdb.org/t/p/w500/wVYREutTvI2tmxr6ujrHT704wGF.jpg" },
-      { title:"Hush", emoji:"🤫", img:"https://image.tmdb.org/t/p/w500/1eXVlKQEiC5Evhp1VGN9VOGBev5.jpg" },
-      { title:"It Follows", emoji:"🚶", img:"https://image.tmdb.org/t/p/w500/4MrwJZr0R9LbyOgZqwLNmtzzxbu.jpg" },
-      { title:"The Haunting of Hill House", emoji:"🏚️", img:"https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=1200&auto=format&fit=crop" },
-      { title:"Hereditary", emoji:"🧿", img:"https://image.tmdb.org/t/p/w500/lHV8HHlhwNup2VbpiACtlKzaGIQ.jpg" },
-      { title:"Dark", emoji:"🕳️", img:"https://image.tmdb.org/t/p/w500/7GgqJfU6Y4ZCkxzgv2Fne5DE5F7.jpg" },
-      { title:"What We Do in the Shadows", emoji:"🧛", img:"https://image.tmdb.org/t/p/w500/nvFcvzY7qYAlWT0r1KeR0YV7Yuo.jpg" },
-      { title:"Wednesday", emoji:"🕷️", img:"https://image.tmdb.org/t/p/w500/9PFonBhy4cQy7Jz20NpMygczOkv.jpg" }
+      { title:"The Conjuring", img:"https://image.tmdb.org/t/p/w500/wVYREutTvI2tmxr6ujrHT704wGF.jpg" },
+      { title:"Hush", img:"https://image.tmdb.org/t/p/w500/1eXVlKQEiC5Evhp1VGN9VOGBev5.jpg" },
+      { title:"It Follows", img:"https://image.tmdb.org/t/p/w500/4MrwJZr0R9LbyOgZqwLNmtzzxbu.jpg" },
+      { title:"The Haunting of Hill House", img:"https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=1200&auto=format&fit=crop" },
+      { title:"Hereditary", img:"https://image.tmdb.org/t/p/w500/lHV8HHlhwNup2VbpiACtlKzaGIQ.jpg" },
+      { title:"Dark", img:"https://image.tmdb.org/t/p/w500/7GgqJfU6Y4ZCkxzgv2Fne5DE5F7.jpg" },
+      { title:"What We Do in the Shadows", img:"https://image.tmdb.org/t/p/w500/nvFcvzY7qYAlWT0r1KeR0YV7Yuo.jpg" },
+      { title:"Wednesday", img:"https://image.tmdb.org/t/p/w500/9PFonBhy4cQy7Jz20NpMygczOkv.jpg" }
     ];
 
-    // Render radial labels around the wheel with slice colors
-    function renderWheelLabels() {
-      if (!wheelLabelsHost) return;
-      wheelLabelsHost.innerHTML = '';
-      const slices = wheelTitles.length;
-      const sliceDeg = 360 / slices; // 45°
-      const radius = 112;            // label distance
-      const colors = ['#ff3b45','#e5e5e5','#ff3b45','#e5e5e5','#ff3b45','#e5e5e5','#ff3b45','#e5e5e5']; // match conic alternation
-      const stroke = '0 1px 2px rgba(0,0,0,.75)';
-
-      for (let i=0;i<slices;i++){
-        const angle = (i * sliceDeg) + (sliceDeg / 2);
-        const el = document.createElement('div');
-        el.className = 'wheel-label';
-        const t = wheelTitles[i];
-        const shortTitle = t.title.length > 22 ? t.title.slice(0,20) + '…' : t.title;
-        el.innerHTML = `<span style="display:block; font-size:12px;">${t.emoji} ${shortTitle}</span><small>${i+1}</small>`;
-        el.style.transform = `translate(-50%, -50%) rotate(${angle}deg) translate(0, -${radius}px) rotate(${-angle}deg)`;
-        el.style.color = colors[i];
-        el.style.textShadow = stroke;
-        wheelLabelsHost.appendChild(el);
-      }
-    }
-    renderWheelLabels();
-
-    let currentRotation = 0;
+    let currentRotation = 0; // degrees
     function openWheelModal(){ wheelModal.classList.remove('hidden'); wheelModal.classList.add('flex'); lockScroll(); wheelResult.classList.add('hidden'); }
     function closeWheelModal(){ wheelModal.classList.add('hidden'); wheelModal.classList.remove('flex'); unlockScroll(); drumroll.pause(); drumroll.currentTime=0; }
     openWheel.addEventListener('click', openWheelModal);
@@ -464,36 +431,43 @@
     wheelModal.addEventListener('click', (e)=>{ if(e.target===wheelModal) closeWheelModal(); });
 
     spinBtn.addEventListener('click', () => {
+      // guard: stop any playing reveal sound
       const reveal = document.getElementById('reveal-sound'); if(reveal){ reveal.pause(); reveal.currentTime=0; }
+      // play drumroll
       drumroll.currentTime = 0; drumroll.play().catch(()=>{});
       wheelResult.classList.add('hidden');
 
-      const slices = wheelTitles.length, sliceDeg = 360 / slices;
-      const selectedIndex = Math.floor(Math.random() * slices);
+      const slices = 8; const sliceDeg = 360 / slices;
+      const selectedIndex = Math.floor(Math.random() * slices); // 0..7
+      // Pointer at top (0deg). To land on index k, rotate so pointer hits that slice's center:
       const targetCenterDeg = (selectedIndex * sliceDeg) + (sliceDeg / 2);
-      const spins = 5;
-      const targetRotation = (spins * 360) + (360 - targetCenterDeg);
+      const spins = 5; // full spins before stop
+      const targetRotation = (spins * 360) + (360 - targetCenterDeg); // rotate wheel so pointer top aligns with slice center
       currentRotation = currentRotation + targetRotation;
       wheel.style.transform = `rotate(${currentRotation}deg)`;
 
-      const SPIN_DUR = 3200;
+      // after spin, show result
+      const SPIN_DUR = 3200; // must match CSS transition duration
       setTimeout(() => {
+        // normalize angle to 0..360 and compute which index landed (inverse of above)
         const norm = ((currentRotation % 360) + 360) % 360;
+        // which slice is under pointer? pointer at 0deg => slice whose center is at 360 - norm
         const pointerDeg = (360 - norm + 360) % 360;
         const landedIndex = Math.floor(pointerDeg / sliceDeg) % slices;
 
         const pick = wheelTitles[landedIndex];
         wheelPoster.src = pick.img; wheelPoster.alt = pick.title;
-        wheelTitle.textContent = `${pick.emoji} ${pick.title}`;
+        wheelTitle.textContent = pick.title;
         wheelNote.textContent = "Tonight’s pick";
         wheelResult.classList.remove('hidden');
 
+        // stop drumroll and play reveal sting
         drumroll.pause(); drumroll.currentTime = 0;
         const s = document.getElementById('reveal-sound'); s && s.play && s.play().catch(()=>{});
       }, SPIN_DUR + 30);
     });
 
-    // ESC closes all
+    // ESC closes
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         ['quiz-modal','result-modal','result-transition','wheel-modal'].forEach(id=>document.getElementById(id).classList.add('hidden'));
@@ -503,3 +477,4 @@
   </script>
 </body>
 </html>
+
